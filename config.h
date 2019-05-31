@@ -6,31 +6,42 @@ static const unsigned int gappx     = 10;       /* gap pixel between windows */
 static const unsigned int snap      = 32;       /* snap pixel */
 static const int showbar            = 1;        /* 0 means no bar */
 static const int topbar             = 1;        /* 0 means bottom bar */
-static const char *fonts[]          = { "Source Code Pro:size=12" };
+
+static const int horizpadbar		= 4;
+static const int vertpadbar         = 10;
+
+static const char *fonts[]          = { "SauceCodePro Nerd Font:size=11" };
+
 static const char col_gray1[]       = "#222222";
 static const char col_gray2[]       = "#444444";
 static const char col_gray3[]       = "#bbbbbb";
 static const char col_gray4[]       = "#eeeeee";
+static const char col_black[]       = "#000000";
+static const char col_red[]         = "#ff0000";
+static const char col_yellow[]      = "#ffff00";
+static const char col_white[]       = "#ffffff";
 static const char col_cyan[]        = "#005577";
 
 /* Transparent Bar */
-static const unsigned int baralpha        = 0xd0;
+static const unsigned int baralpha        = 0xcc;
 static const unsigned int borderalpha     = OPAQUE;
 
-static const char *colors[][3]      = {
-	/*               fg         bg         border   */
-	[SchemeNorm] = { col_gray3, col_gray1, col_gray2 },
-	[SchemeSel]  = { col_gray4, col_cyan,  col_cyan  },
+static const char *colors[][3] = {
+	/*               fg           bg          border  */
+	[SchemeNorm] =	 { col_gray3, col_gray1,  col_gray2 },
+	[SchemeSel]  =	 { col_gray4, col_cyan,   col_cyan },
+	[SchemeWarn] =	 { col_black, col_yellow, col_red },
+	[SchemeUrgent]=	 { col_white, col_red,    col_red },
 };
 
-static const unsigned int alphas[][3]      = {
+static const unsigned int alphas[][3] = {
 	/*               fg      bg        border     */
 	[SchemeNorm] = { OPAQUE, baralpha, borderalpha },
 	[SchemeSel]  = { OPAQUE, baralpha, borderalpha },
 };
 
 /* tagging */
-static const char *tags[] = { "1", "2", "3", "4", "5", "6", "7", "8", "9" };
+static const char *tags[] = { "", "", "", "", "", "", "", "", "" };
 
 static const Rule rules[] = {
 	/* xprop(1):
@@ -38,14 +49,15 @@ static const Rule rules[] = {
 	 *	WM_NAME(STRING) = title
 	 */
 	/* class      instance    title       tags mask     isfloating   monitor */
-	{ "Gimp",     NULL,       NULL,       1 << 3,       1,           -1 },
+	{ "Gimp",     NULL,       NULL,       1 << 8,       1,           -1 },
 	{ "Chromium", NULL,       NULL,       1 << 1,       0,           -1 },
+	{ "Spotify",  NULL,       NULL,       1 << 3,       0,           -1 },
 };
 
 /* layout(s) */
 static const float mfact     = 0.55; /* factor of master area size [0.05..0.95] */
 static const int nmaster     = 1;    /* number of clients in master area */
-static const int resizehints = 1;    /* 1 means respect size hints in tiled resizals */
+static const int resizehints = 0;    /* 1 means respect size hints in tiled resizals */
 
 static const Layout layouts[] = {
 	/* symbol     arrange function */
@@ -61,29 +73,46 @@ static const Layout layouts[] = {
 #define TAGKEYS(KEY,TAG) \
 	{ MODKEY,                       KEY,      view,           {.ui = 1 << TAG} }, \
 	{ MODKEY|ControlMask,           KEY,      toggleview,     {.ui = 1 << TAG} }, \
-	{ MODKEY|ShiftMask,             KEY,      tag,            {.ui = 1 << TAG} }, \
+	{ MODKEY2,						KEY,      tag,            {.ui = 1 << TAG} }, \
 	{ MODKEY|ControlMask|ShiftMask, KEY,      toggletag,      {.ui = 1 << TAG} },
 
 /* helper for spawning shell commands in the pre dwm-5.0 fashion */
 #define SHCMD(cmd) { .v = (const char*[]){ "/bin/sh", "-c", cmd, NULL } }
 
 /* commands */
-static const char roficmd[] = "/home/piero/.config/rofi/menu/RUN";
-static const char openfilecmd[] = "/home/piero/.config/rofi/menu/SEARCH";
-static const char systemcmd[] = "/home/piero/.config/rofi/menu/SYSTEM";
-static const char configscmd[] = "/home/piero/.config/rofi/menu/CONFIG";
+static const char cmd_rofi[] = "/home/piero/.config/rofi/menu/RUN";
+static const char cmd_openfile[] = "/home/piero/.config/rofi/menu/SEARCH";
+static const char cmd_system[] = "/home/piero/.config/rofi/menu/SYSTEM";
+static const char cmd_configs[] = "/home/piero/.config/rofi/menu/CONFIG";
 
-static const char *termcmd[] = { "alacritty", NULL };
-static const char *chromiumcmd[] = { "chromium", NULL };
+static const char cmd_printscr[] = "flameshot gui -p /home/piero/Pictures/Screenshots";
+static const char cmd_printscrfull[] = "flameshot full -c";
+
+static const char *cmd_term[] = { "st", NULL };
+static const char *cmd_chromium[] = { "chromium", NULL };
 
 static Key keys[] = {
 	/* modifier                     key        function        argument */
-	{ MODKEY,                       XK_Tab,    spawn,          SHCMD(roficmd)  },
-	{ MODKEY,                       XK_p,      spawn,		   SHCMD(openfilecmd)  },
-	{ MODKEY|MODKEY2,               XK_Escape, spawn,		   SHCMD(systemcmd)  },
-	{ MODKEY|MODKEY2,               XK_Delete, spawn,		   SHCMD(configscmd)  },
-	{ MODKEY,						XK_Return, spawn,          {.v = termcmd } },
-	{ MODKEY,						XK_c,      spawn,          {.v = chromiumcmd } },
+
+	/* Menus */
+	{ MODKEY,                       XK_Tab,    spawn,          SHCMD(cmd_rofi)  },
+	{ MODKEY,                       XK_p,      spawn,		   SHCMD(cmd_openfile)  },
+	{ MODKEY|MODKEY2,               XK_Escape, spawn,		   SHCMD(cmd_system)  },
+	{ MODKEY|MODKEY2,               XK_Delete, spawn,		   SHCMD(cmd_configs)  },
+
+	/* Utilities */
+	{ NULL,							XK_Print,  spawn,          SHCMD(cmd_printscr) },
+	{ ShiftMask,					XK_Print,  spawn,          SHCMD(cmd_printscrfull) },
+
+	/* Application Shortcuts */
+	{ MODKEY,						XK_Return, spawn,          {.v = cmd_term } },
+	{ MODKEY,						XK_c,      spawn,          {.v = cmd_chromium } },
+
+	/* Gaps */
+	{ MODKEY,                       XK_minus,  setgaps,        {.i = -1 } },
+	{ MODKEY,                       XK_plus,   setgaps,        {.i = +1 } },
+	{ MODKEY|MODKEY2,				XK_equal,  setgaps,        {.i = 0  } },
+
 	{ MODKEY,                       XK_b,      togglebar,      {0} },
 	{ MODKEY,                       XK_j,      focusstack,     {.i = +1 } },
 	{ MODKEY,                       XK_k,      focusstack,     {.i = -1 } },
@@ -124,7 +153,7 @@ static Button buttons[] = {
 	{ ClkLtSymbol,          0,              Button1,        setlayout,      {0} },
 	{ ClkLtSymbol,          0,              Button3,        setlayout,      {.v = &layouts[2]} },
 	{ ClkWinTitle,          0,              Button2,        zoom,           {0} },
-	{ ClkStatusText,        0,              Button2,        spawn,          {.v = termcmd } },
+	{ ClkStatusText,        0,              Button2,        spawn,          {.v = cmd_term } },
 	{ ClkClientWin,         MODKEY,         Button1,        movemouse,      {0} },
 	{ ClkClientWin,         MODKEY,         Button2,        togglefloating, {0} },
 	{ ClkClientWin,         MODKEY,         Button3,        resizemouse,    {0} },
