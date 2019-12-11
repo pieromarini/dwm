@@ -49,13 +49,18 @@ static const Rule rules[] = {
 	 *	WM_NAME(STRING) = title
 	 */
 	/* class      instance    title       tags mask     isfloating   monitor */
-	{ "Gimp",     NULL,       NULL,       1 << 8,       1,           -1 },
-	{ "Chromium", NULL,       NULL,       1 << 1,       0,           -1 },
-	{ "Spotify",  NULL,       NULL,       1 << 3,       0,           -1 },
+	{ "Gimp",				NULL,       NULL,       1 << 8,       1,           -1 },
+	{ "Chromium",			NULL,       NULL,       1 << 1,       0,           -1 },
+	{ "Spotify",			NULL,       NULL,       1 << 3,       0,           -1 },
+	{ "Libreoffice",		NULL,       NULL,       1 << 2,       0,           -1 },
+	{ "libreoffice-calc",	NULL,		NULL,       1 << 2,       0,           -1 },
+	// Engine Development Windows
+	{ "Primal Engine",		NULL,		NULL,       1 << 0,       1,           -1 },
+	{ "No Title Yet",		NULL,		NULL,       1 << 0,       1,           -1 },
 };
 
 /* layout(s) */
-static const float mfact     = 0.55; /* factor of master area size [0.05..0.95] */
+static const float mfact     = 0.50; /* factor of master area size [0.05..0.95] */
 static const int nmaster     = 1;    /* number of clients in master area */
 static const int resizehints = 0;    /* 1 means respect size hints in tiled resizals */
 
@@ -88,6 +93,17 @@ static const char cmd_configs[] = "/home/piero/.config/rofi/menu/CONFIG";
 static const char cmd_printscr[] = "flameshot gui -p /home/piero/Pictures/Screenshots";
 static const char cmd_printscrfull[] = "flameshot full -c";
 
+static const char cmd_brightup[] = "light -A 10";
+static const char cmd_brightdown[] = "light -U 10";
+
+static const char cmd_audioplay[] = "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.PlayPause";
+static const char cmd_audionext[] = "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Next";
+static const char cmd_audioprev[] = "dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.Previous";
+
+static const char cmd_volmute[] = "amixer -q set Master toggle";
+static const char cmd_volup[]   = "amixer -q set Master 5%+ unmute";
+static const char cmd_voldown[] = "amixer -q set Master 5%- unmute";
+
 static const char *cmd_term[] = { "st", NULL };
 static const char *cmd_chromium[] = { "chromium", NULL };
 
@@ -101,7 +117,7 @@ static Key keys[] = {
 	{ MODKEY|MODKEY2,               XK_Delete, spawn,		   SHCMD(cmd_configs)  },
 
 	/* Utilities */
-	{ NULL,							XK_Print,  spawn,          SHCMD(cmd_printscr) },
+	{ 0,							XK_Print,  spawn,          SHCMD(cmd_printscr) },
 	{ ShiftMask,					XK_Print,  spawn,          SHCMD(cmd_printscrfull) },
 
 	/* Application Shortcuts */
@@ -111,7 +127,7 @@ static Key keys[] = {
 	/* Gaps */
 	{ MODKEY,                       XK_minus,  setgaps,        {.i = -1 } },
 	{ MODKEY,                       XK_plus,   setgaps,        {.i = +1 } },
-	{ MODKEY|MODKEY2,				XK_equal,  setgaps,        {.i = 0  } },
+	{ MODKEY|MODKEY2,				XK_plus,   setgaps,        {.i = 0  } },
 
 	{ MODKEY,                       XK_b,      togglebar,      {0} },
 	{ MODKEY,                       XK_j,      focusstack,     {.i = +1 } },
@@ -134,6 +150,19 @@ static Key keys[] = {
 	{ MODKEY,                       XK_period, focusmon,       {.i = +1 } },
 	{ MODKEY|ShiftMask,             XK_comma,  tagmon,         {.i = -1 } },
 	{ MODKEY|ShiftMask,             XK_period, tagmon,         {.i = +1 } },
+
+	/* Media Controls */
+	{ 0,							XF86XK_MonBrightnessUp, spawn, SHCMD(cmd_brightup) },
+	{ 0,							XF86XK_MonBrightnessDown, spawn, SHCMD(cmd_brightdown) },
+
+	{ 0,							XF86XK_AudioPlay, spawn, SHCMD(cmd_audioplay) },
+	{ 0,							XF86XK_AudioNext, spawn, SHCMD(cmd_audionext) },
+	{ 0,							XF86XK_AudioPrev, spawn, SHCMD(cmd_audioprev) },
+
+	{ 0,							XF86XK_AudioRaiseVolume, spawn, SHCMD(cmd_volup) },
+	{ 0,							XF86XK_AudioLowerVolume, spawn, SHCMD(cmd_voldown) },
+	{ 0,							XF86XK_AudioMute,		 spawn, SHCMD(cmd_volmute) },
+
 	TAGKEYS(                        XK_1,                      0)
 	TAGKEYS(                        XK_2,                      1)
 	TAGKEYS(                        XK_3,                      2)
